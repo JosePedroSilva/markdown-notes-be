@@ -4,16 +4,13 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const logger = require('./logger');
+const requestLogger = require('./middleware/requestLogger');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-app.use((req, res, next) => {
-    logger.info('Incoming request', { method: req.method, url: req.url });
-    next();
-});
+app.use(requestLogger);
 
 logger.setLogLevel('TRACE');
 
