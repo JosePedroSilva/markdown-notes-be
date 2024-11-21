@@ -33,7 +33,7 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS notes (
             id TEXT PRIMARY KEY NOT NULL,
             title TEXT NOT NULL,
-            content TEXT NOT NULL,
+            content TEXT,
             user_id TEXT NOT NULL,
             folder_id TEXT, -- Links to a folder
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
