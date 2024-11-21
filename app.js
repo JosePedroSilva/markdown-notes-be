@@ -12,9 +12,13 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
+const apiRouter = express.Router();
+
 logger.setLogLevel('TRACE');
 
-app.use('/auth', authRoutes);
+apiRouter.use('/auth', authRoutes);
+
+app.use('/api/v1', apiRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
