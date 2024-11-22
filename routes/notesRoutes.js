@@ -24,6 +24,7 @@ router.post('/', authenticateTokenMiddleware, async (req, res) => {
 
     const noteId = crypto.randomUUID();
 
+    // TODO: Handle the folder id 
     db.run(query, [noteId, title, folderId, userId], (err) => {
         if (err) {
             logger.error(`Failed to create note`, { error: err });
@@ -33,6 +34,28 @@ router.post('/', authenticateTokenMiddleware, async (req, res) => {
         logger.info(`Note created`, { title, folderId, userId });
         res.status(201).send('Note created');
     });
+});
+
+router.get('/', authenticateTokenMiddleware, async (req, res) => {
+    if (!req.user) {
+        logger.error('User not authenticated');
+        return res.status(401).send('User not authenticated');
+    }
+
+    const userId = req.user.id;
+
+    logger.trace(`Fetching notes for user`, { userId });
+
+    const allNotesQuery = `SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ?`;
+
+    const foldersQuery = `SELECT (id, name, parent_folder_id) FROM folders WHERE user_id = ?`;
+
+    db.all(allNotesQuery, [userId], (err, notes) => {
+        logger.trace(`Fetched notes`, { notes });
+    });
+
+    res.status(200).send({});
+
 });
 
 module.exports = router;
