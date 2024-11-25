@@ -11,6 +11,11 @@ export default [
     rules: {
       'indent': ['error', 2],
       'quotes': ['error', 'single'],
+      'no-console': 'error',
+      'no-duplicate-imports': 'error',
     }
+  },
+  {
+    ignores: ['**/node_modules/**', 'logger.js'],
   }
 ];
