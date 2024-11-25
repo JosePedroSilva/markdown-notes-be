@@ -3,8 +3,8 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database.db');
 
 db.serialize(() => {
-    // Users table
-    db.run(`
+  // Users table
+  db.run(`
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY NOT NULL,
             email TEXT UNIQUE NOT NULL,
@@ -14,8 +14,8 @@ db.serialize(() => {
         )
     `);
 
-    // Folders table
-    db.run(`
+  // Folders table
+  db.run(`
         CREATE TABLE IF NOT EXISTS folders (
             id TEXT PRIMARY KEY NOT NULL,
             name TEXT NOT NULL,
@@ -28,8 +28,8 @@ db.serialize(() => {
         )
     `);
 
-    // Notes table
-    db.run(`
+  // Notes table
+  db.run(`
         CREATE TABLE IF NOT EXISTS notes (
             id TEXT PRIMARY KEY NOT NULL,
             title TEXT NOT NULL,
@@ -43,8 +43,8 @@ db.serialize(() => {
         )
     `);
 
-    // Tags table
-    db.run(`
+  // Tags table
+  db.run(`
         CREATE TABLE IF NOT EXISTS tags (
             id TEXT PRIMARY KEY NOT NULL,
             name TEXT NOT NULL,
@@ -55,8 +55,8 @@ db.serialize(() => {
         )
     `);
 
-    // NoteTags table
-    db.run(`
+  // NoteTags table
+  db.run(`
         CREATE TABLE IF NOT EXISTS note_tags (
             note_id TEXT NOT NULL,
             tag_id TEXT NOT NULL,
@@ -65,7 +65,6 @@ db.serialize(() => {
             FOREIGN KEY (tag_id) REFERENCES tags(id)
         )
     `);
-
 
 });
 
