@@ -25,7 +25,4 @@ apiRouter.use('/folders', foldersRoutes);
 
 app.use('/api/v1', apiRouter);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT}`);
-});
+module.exports = app;
