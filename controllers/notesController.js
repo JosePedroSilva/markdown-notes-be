@@ -19,16 +19,16 @@ exports.createNote = async (req, res) => {
   }
 
   const userId = req.user.id;
-  logger.trace(`Creating note`, { title, folderId, userId });
+  logger.trace('Creating note', { title, folderId, userId });
 
   const noteId = crypto.randomUUID();
 
   try {
     await noteModel.createNote(noteId, title, folderId, userId);
-    logger.info(`Note created`, { title, folderId, userId });
+    logger.info('Note created', { title, folderId, userId });
     res.status(201).send('Note created');
   } catch (err) {
-    logger.error(`Failed to create note`, { error: err });
+    logger.error('Failed to create note', { error: err });
     return res.status(500).send('Failed to create note');
   }
 };
@@ -42,28 +42,28 @@ exports.getAllNotesOverview = async (req, res) => {
 
   const userId = req.user.id;
 
-  logger.trace(`Fetching notes for user`, { userId });
+  logger.trace('Fetching notes for user', { userId });
 
 
   try {
-    logger.trace(`Fetching notes`, { userId });
+    logger.trace('Fetching notes', { userId });
     const notes = await noteModel.getAllNotesByUserId(userId);
 
-    logger.debug(`Fetched notes`, { notes });
+    logger.debug('Fetched notes', { notes });
 
-    logger.trace(`Fetching folders`, { userId });
+    logger.trace('Fetching folders', { userId });
     const folders = await folderModel.getFoldersByUserId(userId);
 
-    logger.debug(`Fetched folders`, { folders });
+    logger.debug('Fetched folders', { folders });
 
-    logger.trace(`Building folder tree`, { folders, notes });
+    logger.trace('Building folder tree', { folders, notes });
     const folderTree = buildFolderTree(folders, notes);
 
-    logger.debug(`Folder tree`, { folderTree });
+    logger.debug('Folder tree', { folderTree });
     res.status(200).send({ folderTree });
 
   } catch (err) {
-    logger.error(`Failed to fetch notes`, { error: err });
+    logger.error('Failed to fetch notes', { error: err });
     return res.status(500).send('Failed to fetch notes');
   }
 }

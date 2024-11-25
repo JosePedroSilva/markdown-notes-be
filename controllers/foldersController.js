@@ -16,16 +16,16 @@ exports.createFolder = async (req, res) => {
   }
 
   const userId = req.user.id;
-  logger.trace(`Creating folder`, { title, parentFolderId, userId });
+  logger.trace('Creating folder', { title, parentFolderId, userId });
 
   const folderId = crypto.randomUUID();
 
   try {
     await folderModel.createFolder(folderId, title, userId, parentFolderId);
-    logger.info(`Folder created`, { title, parentFolderId, userId });
+    logger.info('Folder created', { title, parentFolderId, userId });
     res.status(201).send('Folder created');
   } catch (err) {
-    logger.error(`Failed to create folder`, { error: err });
+    logger.error('Failed to create folder', { error: err });
     return res.status(500).send('Failed to create folder');
   }
 
