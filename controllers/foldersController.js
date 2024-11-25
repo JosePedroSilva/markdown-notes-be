@@ -1,6 +1,8 @@
 const db = require('../config/database');
 const logger = require('../logger');
 
+const folderModel = require('../models/folderModel');
+
 exports.createFolder = async (req, res) => {
     const { title, parentFolderId } = req.body;
 
@@ -17,18 +19,15 @@ exports.createFolder = async (req, res) => {
     const userId = req.user.id;
     logger.trace(`Creating folder`, { title, parentFolderId, userId });
 
-    const query = `INSERT INTO folders (id, name, user_id, parent_folder_id) VALUES (?, ?, ?, ?)`;
-
     const folderId = crypto.randomUUID();
 
-    db.run(query, [folderId, title, userId, parentFolderId], (err) => {
-        if (err) {
-            logger.error(`Failed to create folder`, { error: err });
-            return res.status(500).send('Failed to create folder');
-        }
-
+    try {
+        await folderModel.createFolder(folderId, title, userId, parentFolderId);
         logger.info(`Folder created`, { title, parentFolderId, userId });
         res.status(201).send('Folder created');
-    });
+    } catch (err) {
+        logger.error(`Failed to create folder`, { error: err });
+        return res.status(500).send('Failed to create folder');
+    }
 
 }

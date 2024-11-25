@@ -1,7 +1,9 @@
-const db = require('../config/database');
 const logger = require('../logger');
-const dbAllPromise = require('../utils/dbAllPromise');
+
 const buildFolderTree = require('../utils/buildFolderTree');
+
+const noteModel = require('../models/noteModel');
+const folderModel = require('../models/folderModel');
 
 exports.createNote = async (req, res) => {
     const { title, folderId } = req.body;
@@ -19,20 +21,16 @@ exports.createNote = async (req, res) => {
     const userId = req.user.id;
     logger.trace(`Creating note`, { title, folderId, userId });
 
-    const query = `INSERT INTO notes (id, title, folder_Id, user_Id) VALUES (?, ?, ?, ?)`;
-
     const noteId = crypto.randomUUID();
 
-    // TODO: Handle the folder id 
-    db.run(query, [noteId, title, folderId, userId], (err) => {
-        if (err) {
-            logger.error(`Failed to create note`, { error: err });
-            return res.status(500).send('Failed to create note');
-        }
-
+    try {
+        await noteModel.createNote(noteId, title, folderId, userId);
         logger.info(`Note created`, { title, folderId, userId });
         res.status(201).send('Note created');
-    });
+    } catch (err) {
+        logger.error(`Failed to create note`, { error: err });
+        return res.status(500).send('Failed to create note');
+    }
 };
 
 // Returns the base folder and notes tree, note that it does not return the content of the notes
@@ -48,17 +46,13 @@ exports.getAllNotesOverview = async (req, res) => {
 
 
     try {
-        const allNotesQuery = `SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ?`;
-
-        const foldersQuery = `SELECT id, name, parent_folder_id FROM folders WHERE user_id = ?`;
-
         logger.trace(`Fetching notes`, { userId });
-        const notes = await dbAllPromise(allNotesQuery, [userId]);
+        const notes = await noteModel.getAllNotesByUserId(userId);
 
         logger.debug(`Fetched notes`, { notes });
 
         logger.trace(`Fetching folders`, { userId });
-        const folders = await dbAllPromise(foldersQuery, [userId]);
+        const folders = await folderModel.getFoldersByUserId(userId);
 
         logger.debug(`Fetched folders`, { folders });
 
