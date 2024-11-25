@@ -44,7 +44,6 @@ exports.getAllNotesOverview = async (req, res) => {
 
   logger.trace('Fetching notes for user', { userId });
 
-
   try {
     logger.trace('Fetching notes', { userId });
     const notes = await noteModel.getAllNotesByUserId(userId);

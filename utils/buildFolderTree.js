@@ -36,7 +36,6 @@ const buildFolderTree = (folders, notes) => {
 
   folderTree.push(rootFolder);
 
-
   return folderTree;
 };
 
