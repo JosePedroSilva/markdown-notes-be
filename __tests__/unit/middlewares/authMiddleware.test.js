@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const authenticateTokenMiddleware = require('../../../middleware/authMiddleware');
+const authenticateTokenMiddleware = require('../../../src/middleware/authMiddleware');
 const logger = require('../../../logger');
 
 jest.mock('jsonwebtoken');

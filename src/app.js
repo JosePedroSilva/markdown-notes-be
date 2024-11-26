@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const logger = require('./logger');
+const logger = require('../logger');
 const requestLogger = require('./middleware/requestLogger');
 
 const authRoutes = require('./routes/authRoutes');
