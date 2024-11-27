@@ -1,4 +1,41 @@
-// TODO: Thought about the json structure and the possibility to add the folders to the root as children
+// {
+//   "id": 0,
+//   "name": "Root",
+//   "children": [
+//     {
+//       "id": 2,
+//       "name": "Folder 1",
+//       "children": [
+//         {
+//           "id": 3,
+//           "name": "Folder 2",
+//           "notes": [
+//             {
+//               "id": 1,
+//               "title": "Note 1",
+//               "folder_id": 3
+//             }
+//           ]
+//         }
+//       ],
+//       "notes": [
+//         {
+//           "id": 2,
+//           "title": "Note 2",
+//           "folder_id": 2
+//         }
+//       ]
+//     }
+//   ],
+//  "notes": [
+//    {
+//      "id": 3,
+//      "title": "Note 3",
+//      "folder_id": null
+//    }
+//  ]
+// }
+
 const buildFolderTree = (folders, notes) => {
   const folderTree = [];
   const rootFolder = {
