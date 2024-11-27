@@ -1,4 +1,3 @@
-// __tests__/buildFolderTree.test.js
 const buildFolderTree = require('../../src/utils/buildFolderTree');
 
 describe('buildFolderTree', () => {
