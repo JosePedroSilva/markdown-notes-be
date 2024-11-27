@@ -1,79 +1,28 @@
-// {
-//   "id": 0,
-//   "name": "Root",
-//   "children": [
-//     {
-//       "id": 2,
-//       "name": "Folder 1",
-//       "children": [
-//         {
-//           "id": 3,
-//           "name": "Folder 2",
-//           "notes": [
-//             {
-//               "id": 1,
-//               "title": "Note 1",
-//               "folder_id": 3
-//             }
-//           ]
-//         }
-//       ],
-//       "notes": [
-//         {
-//           "id": 2,
-//           "title": "Note 2",
-//           "folder_id": 2
-//         }
-//       ]
-//     }
-//   ],
-//  "notes": [
-//    {
-//      "id": 3,
-//      "title": "Note 3",
-//      "folder_id": null
-//    }
-//  ]
-// }
-
 const buildFolderTree = (folders, notes) => {
-  const folderTree = [];
-  const rootFolder = {
-    id: null,
-    name: 'Root',
-  }
 
-  folders.forEach(folder => {
-    if (!folder.parent_folder_id) {
-      folderTree.push(folder);
+  const buildSubTree = (parentId) => {
+    const children = folders.filter(f => f.parent_folder_id === parentId);
+    const folderNotes = notes.filter(n => n.folder_id === parentId);
+
+    if (parentId === null) {
+      return {
+        id: 0,
+        name: 'Root',
+        children: children.map(child => buildSubTree(child.id)),
+        notes: notes.filter(n => n.folder_id === null)
+      };
     }
 
-    // TODO: Review this part, not sure if it's correct
-    if (folder.parent_folder_id) {
-      const parentFolder = folderTree.find(f => f.id === folder.parent_folder_id);
-      if (parentFolder) {
-        parentFolder.children = parentFolder.children || [];
-        parentFolder.children.push(folder);
-      }
-    }
-  });
+    const folder = folders.find(f => f.id === parentId);
+    return {
+      id: folder.id,
+      name: folder.name,
+      children: children.map(child => buildSubTree(child.id)),
+      ...(folderNotes.length > 0 && { notes: folderNotes })
+    };
+  };
 
-  notes.forEach(note => {
-    const folder = folderTree.find(f => f.id === note.folder_id);
-    if (folder) {
-      folder.notes = folder.notes || [];
-      folder.notes.push(note);
-    }
-
-    if (!folder) {
-      rootFolder.notes = rootFolder.notes || [];
-      rootFolder.notes.push(note);
-    }
-  });
-
-  folderTree.push(rootFolder);
-
-  return folderTree;
+  return buildSubTree(null);
 };
 
 module.exports = buildFolderTree;
