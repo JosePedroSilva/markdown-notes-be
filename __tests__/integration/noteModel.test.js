@@ -43,7 +43,7 @@ describe('Note Model', () => {
         await expect(noteModel.createNote(noteId, title, folderId, userId)).resolves.toEqual({});
 
         expect(dbAllPromise).toHaveBeenCalledWith(
-            'INSERT INTO notes (id, title, folder_Id, user_Id) VALUES (?, ?, ?, ?)',
+            'INSERT INTO notes (id, title, content, folder_Id, user_Id) VALUES (?, ?, ?, ?, ?)',
             [noteId, title, folderId, userId]
         );
     });
