@@ -6,7 +6,7 @@ const router = express.Router();
 
 const db = require('../config/database');
 
-const logger = require('../logger');
+const logger = require('../../logger');
 
 const generateAccessToken = (user) => {
   logger.trace('Generating access token for user:', { user });

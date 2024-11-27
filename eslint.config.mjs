@@ -21,6 +21,6 @@ export default [
     }
   },
   {
-    ignores: ['**/node_modules/**', 'logger.js'],
+    ignores: ['**/node_modules/**', 'logger.js', '**/__tests__/**'],
   }
 ];
