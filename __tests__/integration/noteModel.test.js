@@ -1,9 +1,8 @@
-// __tests__/noteModel.test.js
 const sqlite3 = require('sqlite3').verbose();
-const noteModel = require('../../../src/models/noteModel');
-const dbAllPromise = require('../../../src/utils/dbAllPromise');
+const noteModel = require('../../src/models/noteModel');
+const dbAllPromise = require('../../src/utils/dbAllPromise');
 
-jest.mock('../../../src/utils/dbAllPromise');
+jest.mock('../../src/utils/dbAllPromise');
 
 describe('Note Model', () => {
     let db;

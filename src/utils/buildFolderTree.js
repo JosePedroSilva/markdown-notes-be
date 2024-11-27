@@ -1,42 +1,28 @@
-// TODO: Thought about the json structure and the possibility to add the folders to the root as children
 const buildFolderTree = (folders, notes) => {
-  const folderTree = [];
-  const rootFolder = {
-    id: null,
-    name: 'Root',
-  }
 
-  folders.forEach(folder => {
-    if (!folder.parent_folder_id) {
-      folderTree.push(folder);
+  const buildSubTree = (parentId) => {
+    const children = folders.filter(f => f.parent_folder_id === parentId);
+    const folderNotes = notes.filter(n => n.folder_id === parentId);
+
+    if (parentId === null) {
+      return {
+        id: 0,
+        name: 'Root',
+        children: children.map(child => buildSubTree(child.id)),
+        notes: notes.filter(n => n.folder_id === null)
+      };
     }
 
-    // TODO: Review this part, not sure if it's correct
-    if (folder.parent_folder_id) {
-      const parentFolder = folderTree.find(f => f.id === folder.parent_folder_id);
-      if (parentFolder) {
-        parentFolder.children = parentFolder.children || [];
-        parentFolder.children.push(folder);
-      }
-    }
-  });
+    const folder = folders.find(f => f.id === parentId);
+    return {
+      id: folder.id,
+      name: folder.name,
+      children: children.map(child => buildSubTree(child.id)),
+      ...(folderNotes.length > 0 && { notes: folderNotes })
+    };
+  };
 
-  notes.forEach(note => {
-    const folder = folderTree.find(f => f.id === note.folder_id);
-    if (folder) {
-      folder.notes = folder.notes || [];
-      folder.notes.push(note);
-    }
-
-    if (!folder) {
-      rootFolder.notes = rootFolder.notes || [];
-      rootFolder.notes.push(note);
-    }
-  });
-
-  folderTree.push(rootFolder);
-
-  return folderTree;
+  return buildSubTree(null);
 };
 
 module.exports = buildFolderTree;
