@@ -21,6 +21,7 @@ db.serialize(() => {
             name TEXT NOT NULL,
             user_id TEXT NOT NULL,
             parent_folder_id TEXT,
+            deleted BOOLEAN DEFAULT FALSE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id),
@@ -35,7 +36,8 @@ db.serialize(() => {
             title TEXT NOT NULL,
             content TEXT,
             user_id TEXT NOT NULL,
-            folder_id TEXT, -- Links to a folder
+            folder_id TEXT, 
+            deleted BOOLEAN DEFAULT FALSE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id),
@@ -49,6 +51,7 @@ db.serialize(() => {
             id TEXT PRIMARY KEY NOT NULL,
             name TEXT NOT NULL,
             user_id TEXT NOT NULL,
+            deleted BOOLEAN DEFAULT FALSE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
