@@ -49,6 +49,7 @@ exports.getNote = async (req, res) => {
   const userId = req.user.id;
   logger.trace('Fetching note', { noteId, userId });
 
+  // TODO: It's not working properly it's returning 200 with empty array
   try {
     const note = await noteModel.getNoteById(noteId, userId);
     logger.debug('Fetched note', { note });
@@ -89,6 +90,32 @@ exports.updateNote = async (req, res) => {
   } catch (err) {
     logger.error('Failed to update note', { error: err });
     return res.status(500).send('Failed to update note');
+  }
+};
+
+exports.deleteNote = async (req, res) => {
+  const noteId = req.params.noteId;
+
+  if (typeof noteId !== 'string') {
+    logger.error('Invalid input type', { noteId });
+    return res.status(400).send('Invalid input type');
+  }
+
+  if (!req.user) {
+    logger.error('User not authenticated');
+    return res.status(401).send('User not authenticated');
+  }
+
+  const userId = req.user.id;
+  logger.trace('Deleting note', { noteId, userId });
+
+  try {
+    await noteModel.deleteNoteById(noteId, userId);
+    logger.info('Note deleted', { noteId, userId });
+    res.status(200).send('Note deleted');
+  } catch (err) {
+    logger.error('Failed to delete note', { error: err });
+    return res.status(500).send('Failed to delete note');
   }
 };
 

@@ -14,4 +14,6 @@ router.put('/:noteId', notesController.updateNote);
 
 router.get('/', notesController.getAllNotesOverview);
 
+router.delete('/:noteId', notesController.deleteNote);
+
 module.exports = router;

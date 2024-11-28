@@ -24,3 +24,10 @@ exports.updateNote = (noteId, title, content, folderId, userId) => {
 
   return dbAllPromise(query, [title, content, folderId, noteId, userId]);
 }
+
+exports.deleteNoteById = (noteId, userId) => {
+  // Make it a soft delete
+  const query = 'UPDATE notes SET deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?';
+
+  return dbAllPromise(query, [noteId, userId]);
+};
