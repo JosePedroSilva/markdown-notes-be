@@ -49,12 +49,11 @@ exports.getNote = async (req, res) => {
   const userId = req.user.id;
   logger.trace('Fetching note', { noteId, userId });
 
-  // TODO: It's not working properly it's returning 200 with empty array
   try {
     const note = await noteModel.getNoteById(noteId, userId);
     logger.debug('Fetched note', { note });
 
-    if (!note) {
+    if (note.length === 0) {
       logger.error('Note not found', { noteId });
       return res.status(404).send('Note not found');
     }
