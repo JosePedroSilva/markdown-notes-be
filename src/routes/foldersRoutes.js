@@ -7,4 +7,6 @@ router.use(authenticateTokenMiddleware)
 
 router.post('/', foldersController.createFolder);
 
+router.put('/:folderId', foldersController.updateFolder);
+
 module.exports = router;
