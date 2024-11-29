@@ -8,6 +8,12 @@ router.use(authenticateTokenMiddleware);
 
 router.post('/', notesController.createNote);
 
+router.get('/:noteId', notesController.getNote);
+
+router.put('/:noteId', notesController.updateNote);
+
 router.get('/', notesController.getAllNotesOverview);
+
+router.delete('/:noteId', notesController.deleteNote);
 
 module.exports = router;

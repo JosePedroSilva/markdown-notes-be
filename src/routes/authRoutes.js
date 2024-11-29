@@ -41,7 +41,7 @@ router.post('/register', async (req, res) => {
 
     logger.info('User registered', { id: uuid });
 
-    res.status(201).send({ accessToken, user: { id: uuid, email } });
+    res.status(201).send({ token: accessToken, user: { id: uuid, email } });
   });
 });
 

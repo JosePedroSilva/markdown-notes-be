@@ -43,7 +43,7 @@ describe('Note Model', () => {
         await expect(noteModel.createNote(noteId, title, folderId, userId)).resolves.toEqual({});
 
         expect(dbAllPromise).toHaveBeenCalledWith(
-            'INSERT INTO notes (id, title, folder_Id, user_Id) VALUES (?, ?, ?, ?)',
+            'INSERT INTO notes (id, title, content, folder_Id, user_Id) VALUES (?, ?, ?, ?, ?)',
             [noteId, title, folderId, userId]
         );
     });
@@ -59,7 +59,7 @@ describe('Note Model', () => {
         await expect(noteModel.getAllNotesByUserId(userId)).resolves.toEqual(notes);
 
         expect(dbAllPromise).toHaveBeenCalledWith(
-            'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ?',
+            'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ? AND deleted = FALSE',
             [userId]
         );
     });
