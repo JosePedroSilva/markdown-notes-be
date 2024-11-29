@@ -59,7 +59,7 @@ describe('Note Model', () => {
         await expect(noteModel.getAllNotesByUserId(userId)).resolves.toEqual(notes);
 
         expect(dbAllPromise).toHaveBeenCalledWith(
-            'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ?',
+            'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ? AND deleted = FALSE',
             [userId]
         );
     });

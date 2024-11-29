@@ -8,7 +8,7 @@ exports.createNote = (noteId, title, content, folderId, userId) => {
 }
 
 exports.getAllNotesByUserId = (userId) => {
-  const query = 'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ?';
+  const query = 'SELECT id, title, folder_id, created_at, updated_at FROM notes WHERE user_id = ? AND deleted = FALSE';
 
   return dbAllPromise(query, [userId]);
 }
