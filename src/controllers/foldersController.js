@@ -61,3 +61,29 @@ exports.updateFolder = async (req, res) => {
     return res.status(500).send('Failed to update folder');
   }
 };
+
+exports.deleteFolder = async (req, res) => {
+  const { folderId } = req.params;
+
+  if (!folderId) {
+    logger.error('Folder ID not provided');
+    return res.status(400).send('Folder ID not provided');
+  }
+
+  if (!req.user) {
+    logger.error('User not authenticated');
+    return res.status(401).send('User not authenticated');
+  }
+
+  const userId = req.user.id;
+  logger.trace('Deleting folder', { folderId, userId });
+
+  try {
+    await folderModel.markFolderAndContentsAsDeleted(folderId, userId);
+    logger.info('Folder and contents marked as deleted', { folderId, userId });
+    res.status(200).send('Folder deleted');
+  } catch (err) {
+    logger.error('Failed to delete folder', { error: err });
+    return res.status(500).send('Failed to delete folder');
+  }
+};
