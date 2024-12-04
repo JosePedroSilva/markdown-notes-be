@@ -7,4 +7,8 @@ router.use(authenticateTokenMiddleware)
 
 router.post('/', foldersController.createFolder);
 
+router.put('/:folderId', foldersController.updateFolder);
+
+router.delete('/:folderId', foldersController.deleteFolder);
+
 module.exports = router;
