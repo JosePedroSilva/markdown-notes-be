@@ -77,28 +77,28 @@ npm start
     - **Description**: Registers a new user.
 	- **Request Body**:
 ```json
-	{ 
-		"email": "user@example.com", 
-		"password": "your_password" 
-	}
+{ 
+  "email": "user@example.com", 
+  "password": "your_password" 
+}
 ```
 
 - **Response**:
 	
-	- **201 Created**: User registered successfully, returns a JWT token and a basic user info
-	```json
+- **201 Created**: User registered successfully, returns a JWT token and a basic user info
+```json
 {
-	"token": "eyJhbGciOiJIUzI1NiIsIn",
-	"user": {
-		"id": "70e6e29f-1a90-4726-a1b6-176cb92dbfdd",
-		"email": "user@example.com"
-	}
+  "token": "eyJhbGciOiJIUzI1NiIsIn",
+  "user": {
+    "id": "70e6e29f-1a90-4726-a1b6-176cb92dbfdd",
+    "email": "user@example.com"
+  }
 }
 ```
 	
-	- **409 Bad Request**: Registration failed: Email already exists.
-	- **400 Bad Request**: Invalid input.
-	- **500 Internal Server Error**: An unexpected error occurred on the server side while processing the request.**
+- **409 Bad Request**: Registration failed: Email already exists.
+- **400 Bad Request**: Invalid input.
+- **500 Internal Server Error**: An unexpected error occurred on the server side while processing the request.**
 
 
 - **POST `/login`**
@@ -106,29 +106,29 @@ npm start
     - **Description**: Logs in an existing user.
 	- **Request Body**:
 ```json
-	{ 
-		"email": "user@example.com", 
-		"password": "your_password" 
-	}
+{ 
+  "email": "user@example.com", 
+  "password": "your_password" 
+}
 ```
 
 - **Response**:
 	
 	- **200 OK**: Returns a JWT token and basic user info
-	```json
+```json
 {
-	"token": "eyJhbGciOiJIUzI1NiIsIn",
-	"user": {
-		"id": "70e6e29f-1a90-4726-a1b6-176cb92dbfdd",
-		"email": "user@example.com"
-	}
+  "token": "eyJhbGciOiJIUzI1NiIsIn",
+  "user": {
+    "id": "70e6e29f-1a90-4726-a1b6-176cb92dbfdd",
+    "email": "user@example.com"
+  }
 }
 ```
 	
-	- **400 Bad Request**: The request is malformed, such as missing `email` or `password` fields.
-	- **401 Unauthorized**: The provided credentials are incorrect (e.g., wrong password).
-	- **404 Not Found**: The user does not exist in the database (e.g., the given `email` is not registered).
-	- **500 Internal Server Error**: An unexpected error occurred on the server side while processing the request.
+- **400 Bad Request**: The request is malformed, such as missing `email` or `password` fields.
+- **401 Unauthorized**: The provided credentials are incorrect (e.g., wrong password).
+- **404 Not Found**: The user does not exist in the database (e.g., the given `email` is not registered).
+- **500 Internal Server Error**: An unexpected error occurred on the server side while processing the request.
 
 
 ### Notes Routes
@@ -137,82 +137,80 @@ npm start
 **Authentication Required**: Yes (Send `Authorization: Bearer <token>`)
 
 - **POST `/`**
-    
-    - **Description**: Creates a new note.
-    - **Request Body**:
-	```json
+
+- **Description**: Creates a new note.
+- **Request Body**:
+```json
 {
   "title": "My Note",
   "content": "# Markdown content...",
   "folderId": "optional_folder_id"
 }
 ```
-    - **Response**:
-        - **201 Created**: Note created successfully.
-        - **400 Bad Request**: Invalid input type.
-        - **401 Unauthorized**: Request user is missing
-		- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
+- **Response**:
+- **201 Created**: Note created successfully.
+- **400 Bad Request**: Invalid input type.
+- **401 Unauthorized**: Request user is missing
+	- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 
 - **POST `/:noteId`**
-    
-    - **Description**: Updates an existing note.
-    - **Request Body**:
-	```json
+
+- **Description**: Updates an existing note.
+- **Request Body**:
+```json
 {
-	"title": "Updated Title", 
-	"content": "# Updated markdown content" 
-	...
+  "title": "Updated Title", 
+  "content": "# Updated markdown content" 
 }
 ```
-    - **Response**:
-        - **200 OK**: Note updated.
-        - **400 Bad Request**: Invalid input type.
-        - **401 Unauthorized**: Request user is missing
-        - **404 Not Found**: Note not found
-		- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
+- **Response**:
+- **200 OK**: Note updated.
+- **400 Bad Request**: Invalid input type.
+- **401 Unauthorized**: Request user is missing
+- **404 Not Found**: Note not found
+	- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 - **GET `/`**
 
-	- **Description**: Retrieves an overview of all notes for the authenticated user. May include filters or sorting in the future.
-	- **Response**:
-	    - **200 OK**: Returns a list of notes (without detailed content)
-	```json
+- **Description**: Retrieves an overview of all notes for the authenticated user. May include filters or sorting in the future.
+- **Response**:
+    - **200 OK**: Returns a list of notes (without detailed content)
+```javascript
 {
   id: 0,
   name: 'Root',
   children: [
-	{
-	  id: '1',
-	  name: 'Folder 1',
-	  children: [
-		{
-		  id: '2',
-		  name: 'Folder 2',
-		  children: [
-			{
-			  id: '4',
-			  name: 'Folder 4',
-			  children: [],
-			  notes: [{ id: '5', title: 'Note 5', folder_id: '4' }]
-			}
-		  ],
-		  notes: [{ id: '3', title: 'Note 3', folder_id: '2' }]
-		},
-		{
-		  id: '3',
-		  name: 'Folder 3',
-		  children: [],
-		  notes: [{ id: '4', title: 'Note 4', folder_id: '3' }]
-		}
-	  ],
-	  notes: [{ id: '2', title: 'Note 2', folder_id: '1' }]
-	}
-  ],
+  {
+    id: '1',
+    name: 'Folder 1',
+    children: [
+	  {
+	    id: '2',
+	    name: 'Folder 2',
+	    children: [
+		  {
+		    id: '4',
+		    name: 'Folder 4',
+		    children: [],
+		    notes: [{ id: '5', title: 'Note 5', folder_id: '4' }]
+		  }
+	    ],
+	    notes: [{ id: '3', title: 'Note 3', folder_id: '2' }]
+	  },
+	  {
+	    id: '3',
+	    name: 'Folder 3',
+	    children: [],
+	    notes: [{ id: '4', title: 'Note 4', folder_id: '3' }]
+	  }
+    ],
+    notes: [{ id: '2', title: 'Note 2', folder_id: '1' }]
+  }],
   notes: [{ id: '1', title: 'Note 1', folder_id: null }]
 };
 ```
-	 - **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
+ - **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 **DELETE `/:noteId`**
 
@@ -231,38 +229,39 @@ npm start
 - **POST `/`**
     - **Description**: Creates a new folder.
     - **Request Body**:
-		```json
+```json
 {
-	"name": "Project Notes", 
-	"parentFolderId": "optional_parent_folder_id"
+  "name": "Project Notes", 
+  "parentFolderId": "optional_parent_folder_id"
 }
 ```
-    - **Response**:
-        - **201 Created**: Folder created.
-        - **400 Bad Request**: Invalid input type.
-        - **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
+- **Response**:
+	- **201 Created**: Folder created.
+	- **400 Bad Request**: Invalid input type.
+	- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 - **PUT `/:folderId`**
     
     - **Description**: Updates an existing folder (e.g., rename the folder).
     - **Request Body**:
-		```json
+```json
 {
-	"name": "Updated Folder Name"
+  "name": "Updated Folder Name"
 }
 ```
-    - **Response**:
-        - **200 OK**: Folder updated.
-        - **400 Bad Request**: Invalid input type.
-        - **404 Not Found**: Folder not found.
-        - **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
+- **Response**:
+	- **200 OK**: Folder updated.
+	- **400 Bad Request**: Invalid input type.
+	- **404 Not Found**: Folder not found.
+	- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 - DELETE `/:folderId`
     
-    - **Description**: Soft-deletes a folder and all its descendant folders.
-    - **Response**:
-        - **200 OK**: Folder and its descendants marked as deleted.
-        - **404 Not Found**: Folder not found.
+- **Description**: Soft-deletes a folder and all its descendant folders.
+- **Response**:
+	- **200 OK**: Folder and its descendants marked as deleted.
+	- **404 Not Found**: Folder not found.
+	- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.
 
 ## Database Structure
 
