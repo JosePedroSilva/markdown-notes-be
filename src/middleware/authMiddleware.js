@@ -48,7 +48,7 @@ const authenticateTokenMiddleware = async (req, res, next) => {
     const user = await userModel.getUserById(decodedToken.id);
     logger.trace('Authenticated user', { user });
 
-    if (!user) {
+    if (user.length === 0) {
       logger.warn('User not found');
       return res.status(401).send('User not found');
     }
