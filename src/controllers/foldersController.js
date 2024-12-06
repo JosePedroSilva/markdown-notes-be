@@ -52,6 +52,7 @@ exports.updateFolder = async (req, res) => {
   const userId = req.user.id;
   logger.trace('Updating folder', { folderId, name, parentFolderId, userId });
 
+  // TODO: handle case where folder is not found
   try {
     await folderModel.updateFolder(folderId, name, userId, parentFolderId);
     logger.info('Folder updated', { folderId, name, parentFolderId, userId });
