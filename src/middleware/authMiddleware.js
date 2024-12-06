@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const userModel = require('../models/userModel');
 const logger = require('../../logger');
+
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+const limiter = rateLimit({
+  windowMs: FIFTEEN_MINUTES,
+  limit: 10,
+  message: 'Too many requests, please try again later.',
+});
 
 const securityHeaders = (req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -9,30 +18,6 @@ const securityHeaders = (req, res, next) => {
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   next();
 };
-
-// const authenticateTokenMiddleware = (req, res, next) => {
-//   const token = req.header('Authorization')?.split(' ')[1];
-
-//   logger.trace('Authenticating token', { token });
-
-//   if (!token) {
-//     logger.warn('Token not provided');
-//     return res.status(401).send('Token not provided');
-//   }
-
-//   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-//     if (err) {
-//       logger.warn('Invalid token', { token });
-//       return res.status(403).send('Invalid token');
-//     }
-
-//     req.user = user;
-//     logger.trace('Authenticated user', { user });
-//     next();
-//   });
-// }
-
-// module.exports = authenticateTokenMiddleware;
 
 const authenticateTokenMiddleware = async (req, res, next) => {
   try {
@@ -89,6 +74,7 @@ const authenticateTokenMiddleware = async (req, res, next) => {
 };
 
 const enhance = [
+  limiter,
   securityHeaders,
   authenticateTokenMiddleware,
 ]
