@@ -15,7 +15,7 @@ const setLogLevel = (level) => {
   currentLogLevel = level
 }
 
-function shouldLog(level) {
+const shouldLog = (level) => {
   return LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf(currentLogLevel);
 }
 
