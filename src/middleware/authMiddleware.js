@@ -7,8 +7,13 @@ const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
 const limiter = rateLimit({
   windowMs: FIFTEEN_MINUTES,
-  limit: 10,
+  limit: 100,
   message: 'Too many requests, please try again later.',
+  handler: (req, res, next, options) => {
+    logger.warn(`Rate limit reached for IP: ${req.ip}`);
+
+    res.status(options.statusCode).send(options.message);
+  }
 });
 
 const securityHeaders = (req, res, next) => {
