@@ -1,5 +1,5 @@
 const bycrypt = require('bcryptjs');
-const userModel = require('../models/userModel');
+const userQueries = require('../services/queries/userQueries');
 
 const logger = require('../../logger');
 
@@ -20,7 +20,7 @@ exports.createUser = async (req, res) => {
     const hashedPassword = bycrypt.hashSync(password, 10);
     logger.trace('Hashed password');
 
-    await userModel.createUser(uuid, email, hashedPassword);
+    await userQueries.createUser(uuid, email, hashedPassword);
     logger.info('User registered', { id: uuid });
 
     const accessToken = generateAccessToken({ id: uuid, email });
@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
   logger.trace('Login attempt', { email });
 
   try {
-    const user = await userModel.getUserByEmail(email);
+    const user = await userQueries.getUserByEmail(email);
 
     if (user.length === 0) {
       logger.warn('Login failed: User not found', { email });

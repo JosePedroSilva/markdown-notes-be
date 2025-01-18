@@ -1,16 +1,32 @@
-const dbAllPromise = require('../utils/dbAllPromise');
+// models/user.js
+const { Model, DataTypes } = require('sequelize');
 
-exports.getUserById = (userId) => {
-  const query = 'SELECT * FROM users WHERE id = ?';
-  return dbAllPromise(query, [userId]);
+module.exports = (sequelize) => {
+  class User extends Model {
+  }
+
+  User.init(
+    {
+      id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+      email: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+      }
+    },
+    {
+      sequelize,
+      modelName: 'User',
+      tableName: 'users',
+      timestamps: true,
+    }
+  );
+
+  return User;
 };
-
-exports.createUser = (uuid, email, hashedPassword) => {
-  const query = 'INSERT INTO users (id, email, password) VALUES (?, ?, ?)';
-  return dbAllPromise(query, [uuid, email, hashedPassword]);
-}
-
-exports.getUserByEmail = (email) => {
-  const query = 'SELECT * FROM users WHERE email = ?';
-  return dbAllPromise(query, [email]);
-}

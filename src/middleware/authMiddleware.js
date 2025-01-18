@@ -51,6 +51,7 @@ const authenticateTokenMiddleware = async (req, res, next) => {
     }
 
     const user = await userModel.getUserById(decodedToken.id);
+    logger.debug('refactor log user fetched:', { user });
     logger.trace('Authenticated user', { user });
 
     if (user.length === 0) {
