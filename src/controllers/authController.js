@@ -31,7 +31,7 @@ exports.createUser = async (req, res) => {
     res.status(201).send({ token: accessToken, user: { id: uuid, email } });
 
   } catch (err) {
-    if (err.message.includes('UNIQUE constraint failed: users.email')) {
+    if (err.name.includes('SequelizeUniqueConstraintError')) {
       logger.warn('Registration failed: Email already exists', { email });
       return res.status(409).send('User already exists');
     }
@@ -53,12 +53,12 @@ exports.login = async (req, res) => {
   try {
     const user = await userQueries.getUserByEmail(email);
 
-    if (user.length === 0) {
+    if (!user) {
       logger.warn('Login failed: User not found', { email });
       return res.status(404).send('User not found');
     }
 
-    bycrypt.compare(password, user[0].password, (err, result) => {
+    bycrypt.compare(password, user.password, (err, result) => {
       if (err) {
         logger.error('Login failed', { error: err });
         return res.status(500).send('Error logging in');
@@ -69,11 +69,11 @@ exports.login = async (req, res) => {
         return res.status(401).send('Invalid password');
       }
 
-      const accessToken = generateAccessToken({ id: user[0].id, email: user[0].email });
+      const accessToken = generateAccessToken({ id: user.id, email: user.email });
 
-      logger.info('User logged in', { id: user[0].id });
+      logger.info('User logged in', { id: user.id });
 
-      res.status(200).send({ token: accessToken, user: { id: user[0].id, email: user[0].email } });
+      res.status(200).send({ token: accessToken, user: { id: user.id, email: user.email } });
     });
   } catch (err) {
     logger.error('Login failed', { error: err });
