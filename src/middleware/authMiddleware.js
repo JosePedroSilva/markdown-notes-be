@@ -55,7 +55,7 @@ const authenticateTokenMiddleware = async (req, res, next) => {
     logger.debug('refactor log user fetched:', { user });
     logger.trace('Authenticated user', { user });
 
-    if (user.length === 0) {
+    if (!user) {
       logger.warn('User not found');
       return res.status(401).send('User not found');
     }
