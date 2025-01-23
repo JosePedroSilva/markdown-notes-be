@@ -92,6 +92,10 @@ exports.deleteFolder = async (req, res) => {
     logger.info('Folder and contents marked as deleted', { folderId, userId });
     res.status(200).send('Folder deleted');
   } catch (err) {
+    if (err.message === 'Folder not found') {
+      logger.warn('Folder not found', { folderId, userId });
+      return res.status(404).send('Folder not found');
+    }
     logger.error('Failed to delete folder', { error: err });
     return res.status(500).send('Failed to delete folder');
   }
