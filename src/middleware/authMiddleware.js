@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
-const userModel = require('../models/userModel');
+// const userModel = require('../models/userModel');
+const userQueries = require('../services/queries/userQueries');
 const logger = require('../../logger');
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -50,7 +51,7 @@ const authenticateTokenMiddleware = async (req, res, next) => {
       return res.status(401).send('Token expired');
     }
 
-    const user = await userModel.getUserById(decodedToken.id);
+    const user = await userQueries.getUserById(decodedToken.id);
     logger.debug('refactor log user fetched:', { user });
     logger.trace('Authenticated user', { user });
 
