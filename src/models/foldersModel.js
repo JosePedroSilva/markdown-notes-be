@@ -1,18 +1,17 @@
-// models/Folder.js
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   class Folder extends Model {
     static associate(models) {
-      Folder.belongsTo(models.User, { foreignKey: 'user_id' });
+      Folder.belongsTo(models.User, { foreignKey: 'userId' });
 
       Folder.hasMany(models.Folder, {
-        foreignKey: 'parent_folder_id',
+        foreignKey: 'parentFolderId',
         as: 'subfolders',
       });
 
       Folder.hasMany(models.Note, {
-        foreignKey: 'folder_id',
+        foreignKey: 'folderId',
       });
     }
   }
@@ -27,25 +26,35 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      user_id: {
+      userId: {
         type: DataTypes.STRING,
         allowNull: false,
+        field: 'user_id',
       },
-      parent_folder_id: {
+      parentFolderId: {
         type: DataTypes.STRING,
         allowNull: true,
+        field: 'parent_folder_id',
       },
       deleted: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-      }
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        field: 'created_at',
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        field: 'updated_at',
+      },
     },
     {
       sequelize,
       modelName: 'Folder',
       tableName: 'folders',
       timestamps: true,
-      underscored: true,
+      underscored: false,
     }
   );
 
