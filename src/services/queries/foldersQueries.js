@@ -10,8 +10,6 @@ exports.createFolder = async (folderId, name, userId, parentFolderId) => {
     },
   });
 
-  console.log('existing folder', existingFolder);
-
   const folder = await Folder.create({
     id: folderId,
     name,
@@ -40,6 +38,18 @@ exports.updateFolder = async (folderId, name, userId, parentFolderId) => {
 
   return folder;
 };
+
+exports.getFoldersByUserId = (userId) => {
+  const folders = Folder.findAll({
+    attributes: ['id', 'name', 'parent_folder_id'],
+    where: {
+      user_id: userId,
+      deleted: false,
+    },
+  });
+
+  return folders;
+}
 
 async function getDescendantFolderIds(folderId, userId, transaction) {
   let folderIds = [folderId];
@@ -74,9 +84,9 @@ exports.markFolderAndContentsAsDeleted = async (folderId, userId) => {
     throw new Error('Folder not found');
   }
 
-  const t = await Folder.sequelize.transaction();
+  const transaction = await Folder.sequelize.transaction();
 
-  const folderIdsToMark = await getDescendantFolderIds(folderId, userId, t);
+  const folderIdsToMark = await getDescendantFolderIds(folderId, userId, transaction);
 
   await Folder.update(
     { deleted: true },
@@ -86,7 +96,7 @@ exports.markFolderAndContentsAsDeleted = async (folderId, userId) => {
           [Op.in]: folderIdsToMark,
         },
       },
-      transaction: t
+      transaction: transaction
     }
   );
 
@@ -99,10 +109,10 @@ exports.markFolderAndContentsAsDeleted = async (folderId, userId) => {
         },
         user_id: userId
       },
-      transaction: t
+      transaction: transaction
     }
   );
 
-  await t.commit(); // Commit the transaction if everything is successful
+  await transaction.commit();
 
 };
