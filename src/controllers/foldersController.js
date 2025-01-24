@@ -1,6 +1,6 @@
 const logger = require('../../logger');
 
-const foldersQueries = require('../services/queries/foldersQueries');
+const foldersService = require('../services/foldersService');
 
 exports.createFolder = async (req, res) => {
   const { name, parentFolderId } = req.body;
@@ -18,14 +18,12 @@ exports.createFolder = async (req, res) => {
   const userId = req.user.id;
   logger.trace('Creating folder', { name, parentFolderId, userId });
 
-  const folderId = crypto.randomUUID();
-
   try {
-    await foldersQueries.createFolder(folderId, name, userId, parentFolderId);
-    logger.info('Folder created', { name, parentFolderId, userId });
-    res.status(201).send('Folder created');
+    const result = await foldersService.createFolder(name, parentFolderId, userId);
+    logger.info('Folder created', result);
+    res.status(201).send(result);
   } catch (err) {
-    logger.error('Failed to create folder', { error: err });
+    logger.error('Failed to create folder', err);
     return res.status(500).send('Failed to create folder');
   }
 }
@@ -58,12 +56,11 @@ exports.updateFolder = async (req, res) => {
   logger.trace('Updating folder', { folderId, name, parentFolderId, userId });
 
   try {
-    await foldersQueries.updateFolder(folderId, name, userId, parentFolderId);
-    logger.info('Folder updated', { folderId, name, parentFolderId, userId });
-    res.status(200).send('Folder updated');
+    const result = await foldersService.updatefolder(folderId, name, parentFolderId, userId);
+    logger.info('Folder updated', result);
+    res.status(200).send(result);
   } catch (err) {
     if (err.message === 'Folder not found') {
-      logger.warn('Folder not found', { folderId, userId });
       return res.status(404).send('Folder not found');
     }
     logger.error('Failed to update folder', { error: err });
@@ -88,8 +85,8 @@ exports.deleteFolder = async (req, res) => {
   logger.trace('Deleting folder', { folderId, userId });
 
   try {
-    await foldersQueries.markFolderAndContentsAsDeleted(folderId, userId);
-    logger.info('Folder and contents marked as deleted', { folderId, userId });
+    const result = await foldersService.deleteFolder(folderId, userId);
+    logger.info('Folder and contents marked as deleted', result);
     res.status(200).send('Folder deleted');
   } catch (err) {
     if (err.message === 'Folder not found') {
