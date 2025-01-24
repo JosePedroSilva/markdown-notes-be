@@ -1,9 +1,6 @@
 const logger = require('../../logger');
 
-const buildFolderTree = require('../utils/buildFolderTree');
-
-const notesQueries = require('../services/queries/notesQueries');
-const foldersQueries = require('../services/queries/foldersQueries');
+const notesService = require('../services/notesService');
 
 exports.createNote = async (req, res) => {
   const { title, content, folderId } = req.body;
@@ -21,12 +18,10 @@ exports.createNote = async (req, res) => {
   const userId = req.user.id;
   logger.trace('Creating note', { title, content, folderId, userId });
 
-  const noteId = crypto.randomUUID();
-
   try {
-    await notesQueries.createNote(noteId, title, content, folderId, userId);
-    logger.info('Note created', { title, folderId, userId });
-    res.status(201).send('Note created');
+    const result = await notesService.createNote(title, content, folderId, userId);
+    logger.info('Note created', result);
+    res.status(201).send(result);
   } catch (err) {
     logger.error('Failed to create note', { error: err });
     return res.status(500).send('Failed to create note');
@@ -50,15 +45,16 @@ exports.getNote = async (req, res) => {
   logger.trace('Fetching note', { noteId, userId });
 
   try {
-    const note = await notesQueries.getNoteById(noteId, userId);
-    logger.debug('Fetched note', { note });
+    const result = await notesService.getNoteById(noteId, userId);
+    logger.debug('Fetched note', result);
 
-    if (!note) {
+    // TODO: WIth new ORM this should not work test later
+    if (!result) {
       logger.error('Note not found', { noteId });
       return res.status(404).send('Note not found');
     }
+    res.status(200).send(result);
 
-    res.status(200).send(note);
   } catch (err) {
     logger.error('Failed to fetch note', { error: err });
     return res.status(500).send('Failed to fetch note');
@@ -83,8 +79,8 @@ exports.updateNote = async (req, res) => {
   logger.trace('Updating note', { noteId, title, content, folderId, userId });
 
   try {
-    await notesQueries.updateNote(noteId, title, content, folderId, userId);
-    logger.info('Note updated', { noteId, title, content, folderId, userId });
+    const result = await notesService.updateNote(noteId, title, content, folderId, userId);
+    logger.info('Note updated', result);
     res.status(200).send('Note updated');
   } catch (err) {
     logger.error('Failed to update note', { error: err });
@@ -109,7 +105,7 @@ exports.deleteNote = async (req, res) => {
   logger.trace('Deleting note', { noteId, userId });
 
   try {
-    await notesQueries.deleteNoteById(noteId, userId);
+    await notesService.deleteNote(noteId, userId);
     logger.info('Note deleted', { noteId, userId });
     res.status(200).send('Note deleted');
   } catch (err) {
@@ -130,21 +126,10 @@ exports.getAllNotesOverview = async (req, res) => {
   logger.trace('Fetching notes for user', { userId });
 
   try {
-    logger.trace('Fetching notes', { userId });
-    const notes = await notesQueries.getAllNotesByUserId(userId);
+    const result = await notesService.getAllNotesAndFoldersTree(userId);
 
-    logger.debug('Fetched notes', { notes });
-
-    logger.trace('Fetching folders', { userId });
-    const folders = await foldersQueries.getFoldersByUserId(userId);
-
-    logger.debug('Fetched folders', { folders });
-
-    logger.trace('Building folder tree', { folders, notes });
-    const folderTree = buildFolderTree(folders, notes);
-
-    logger.debug('Folder tree', { folderTree });
-    res.status(200).send({ folderTree });
+    logger.debug('Folder tree', result);
+    res.status(200).send(result);
 
   } catch (err) {
     logger.error('Failed to fetch notes', { error: err });
