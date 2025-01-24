@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
-// const userModel = require('../models/userModel');
 const userQueries = require('../services/queries/userQueries');
 const logger = require('../../logger');
 
