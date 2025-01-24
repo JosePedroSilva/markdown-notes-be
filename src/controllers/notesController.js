@@ -2,8 +2,8 @@ const logger = require('../../logger');
 
 const buildFolderTree = require('../utils/buildFolderTree');
 
-const noteModel = require('../models/noteModel');
-const folderModel = require('../models/folderModel');
+const notesQueries = require('../services/queries/notesQueries');
+const foldersQueries = require('../services/queries/foldersQueries');
 
 exports.createNote = async (req, res) => {
   const { title, content, folderId } = req.body;
@@ -24,7 +24,7 @@ exports.createNote = async (req, res) => {
   const noteId = crypto.randomUUID();
 
   try {
-    await noteModel.createNote(noteId, title, content, folderId, userId);
+    await notesQueries.createNote(noteId, title, content, folderId, userId);
     logger.info('Note created', { title, folderId, userId });
     res.status(201).send('Note created');
   } catch (err) {
@@ -50,10 +50,10 @@ exports.getNote = async (req, res) => {
   logger.trace('Fetching note', { noteId, userId });
 
   try {
-    const note = await noteModel.getNoteById(noteId, userId);
+    const note = await notesQueries.getNoteById(noteId, userId);
     logger.debug('Fetched note', { note });
 
-    if (note.length === 0) {
+    if (!note) {
       logger.error('Note not found', { noteId });
       return res.status(404).send('Note not found');
     }
@@ -83,7 +83,7 @@ exports.updateNote = async (req, res) => {
   logger.trace('Updating note', { noteId, title, content, folderId, userId });
 
   try {
-    await noteModel.updateNote(noteId, title, content, folderId, userId);
+    await notesQueries.updateNote(noteId, title, content, folderId, userId);
     logger.info('Note updated', { noteId, title, content, folderId, userId });
     res.status(200).send('Note updated');
   } catch (err) {
@@ -109,7 +109,7 @@ exports.deleteNote = async (req, res) => {
   logger.trace('Deleting note', { noteId, userId });
 
   try {
-    await noteModel.deleteNoteById(noteId, userId);
+    await notesQueries.deleteNoteById(noteId, userId);
     logger.info('Note deleted', { noteId, userId });
     res.status(200).send('Note deleted');
   } catch (err) {
@@ -131,12 +131,12 @@ exports.getAllNotesOverview = async (req, res) => {
 
   try {
     logger.trace('Fetching notes', { userId });
-    const notes = await noteModel.getAllNotesByUserId(userId);
+    const notes = await notesQueries.getAllNotesByUserId(userId);
 
     logger.debug('Fetched notes', { notes });
 
     logger.trace('Fetching folders', { userId });
-    const folders = await folderModel.getFoldersByUserId(userId);
+    const folders = await foldersQueries.getFoldersByUserId(userId);
 
     logger.debug('Fetched folders', { folders });
 
