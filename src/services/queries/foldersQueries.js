@@ -1,14 +1,20 @@
 const { Folder, Note } = require('../../models');
 const { Op } = require('sequelize');
 
-exports.createFolder = async (folderId, name, userId, parentFolderId) => {
-  const existingFolder = await Folder.findOne({
+exports.getFolderById = async (folderId, userId) => {
+  const folder = await Folder.findOne({
     where: {
-      id: parentFolderId,
+      id: folderId,
       user_id: userId,
       deleted: false,
     },
   });
+
+  return folder;
+};
+
+exports.createFolder = async (folderId, name, userId, parentFolderId) => {
+  const existingFolder = await this.getFolderById(parentFolderId, userId);
 
   const folder = await Folder.create({
     id: folderId,
@@ -39,16 +45,17 @@ exports.updateFolder = async (folderId, name, userId, parentFolderId) => {
   return folder;
 };
 
-exports.getFoldersByUserId = (userId) => {
-  const folders = Folder.findAll({
+exports.getFoldersByUserId = async (userId) => {
+  const folders = await Folder.findAll({
     attributes: ['id', 'name', 'parent_folder_id'],
     where: {
       user_id: userId,
       deleted: false,
     },
   });
+  const plainFolders = folders.map(folder => folder.get({ plain: true }));
 
-  return folders;
+  return plainFolders;
 }
 
 async function getDescendantFolderIds(folderId, userId, transaction) {
@@ -72,15 +79,9 @@ async function getDescendantFolderIds(folderId, userId, transaction) {
 }
 
 exports.markFolderAndContentsAsDeleted = async (folderId, userId) => {
-  const initialFolder = await Folder.findOne({
-    where: {
-      id: folderId,
-      user_id: userId,
-      deleted: false,
-    },
-  });
+  const existingFolder = await this.getFolderById(folderId, userId);
 
-  if (!initialFolder) {
+  if (!existingFolder) {
     throw new Error('Folder not found');
   }
 

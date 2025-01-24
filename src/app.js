@@ -7,7 +7,7 @@ const logger = require('../logger');
 const requestLogger = require('./middleware/requestLogger');
 
 const authRoutes = require('./routes/authRoutes');
-// const notesRoutes = require('./routes/notesRoutes');
+const notesRoutes = require('./routes/notesRoutes');
 const foldersRoutes = require('./routes/foldersRoutes');
 
 const app = express();
@@ -20,7 +20,7 @@ const apiRouter = express.Router();
 logger.setLogLevel('TRACE');
 
 apiRouter.use('/auth', authRoutes);
-// apiRouter.use('/notes', notesRoutes);
+apiRouter.use('/notes', notesRoutes);
 apiRouter.use('/folders', foldersRoutes);
 
 app.use('/api/v1', apiRouter);

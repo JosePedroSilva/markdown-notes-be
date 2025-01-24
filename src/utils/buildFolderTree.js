@@ -2,14 +2,14 @@ const buildFolderTree = (folders, notes) => {
 
   const buildSubTree = (parentId) => {
     const children = folders.filter(f => f.parent_folder_id === parentId);
-    const folderNotes = notes.filter(n => n.folder_id === parentId);
+    const folderNotes = notes.filter(n => n.folderId === parentId);
 
     if (parentId === null) {
       return {
         id: 0,
         name: 'Root',
         children: children.map(child => buildSubTree(child.id)),
-        notes: notes.filter(n => n.folder_id === null)
+        notes: notes.filter(n => n.folderId === null)
       };
     }
 
