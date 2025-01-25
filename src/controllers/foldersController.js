@@ -1,18 +1,37 @@
 const logger = require('../../logger');
-
+const responseErrorBuilder = require('../utils/responseErrorBuilder');
+const responseSuccessBuilder = require('../utils/responseSuccessBuilder');
 const foldersService = require('../services/foldersService');
 
 exports.createFolder = async (req, res) => {
   const { name, parentFolderId } = req.body;
 
-  if (typeof name !== 'string') {
+  if (typeof name !== 'string' || (parentFolderId && typeof parentFolderId !== 'string')) {
     logger.error('Invalid input type', { name, parentFolderId });
-    return res.status(400).send('Invalid input type');
+
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Invalid input type',
+      { name, parentFolderId },
+      req
+    );
+
+    return res.status(400).send(response);
   }
 
   if (!req.user) {
     logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
+    const response = new responseErrorBuilder(
+      'error',
+      401,
+      'UNAUTHORIZED',
+      'User not authenticated',
+      {},
+      req
+    )
+    return res.status(401).send(response);
   }
 
   const userId = req.user.id;
@@ -21,10 +40,24 @@ exports.createFolder = async (req, res) => {
   try {
     const result = await foldersService.createFolder(name, parentFolderId, userId);
     logger.info('Folder created', result);
-    res.status(201).send(result);
+    const response = new responseSuccessBuilder(
+      'success',
+      201,
+      result,
+      req
+    );
+    res.status(201).send(response);
   } catch (err) {
     logger.error('Failed to create folder', err);
-    return res.status(500).send('Failed to create folder');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to create folder',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 }
 
@@ -34,22 +67,54 @@ exports.updateFolder = async (req, res) => {
 
   if (!folderId) {
     logger.error('Folder ID not provided');
-    return res.status(400).send('Folder ID not provided');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Folder ID not provided',
+      {},
+      req
+    );
+    return res.status(400).send(response);
   }
 
-  if (!name && !parentFolderId) {
+  if (!name) {
     logger.error('No update fields provided');
-    return res.status(400).send('No update fields provided');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'No update fields provided',
+      {},
+      req
+    );
+    return res.status(400).send(response);
   }
 
-  if (typeof name !== 'string') {
+  if (typeof name !== 'string' || (parentFolderId && typeof parentFolderId !== 'string')) {
     logger.error('Invalid input type', { name, parentFolderId });
-    return res.status(400).send('Invalid input type');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Invalid input type',
+      { name, parentFolderId },
+      req
+    );
+    return res.status(400).send(response);
   }
 
   if (!req.user) {
     logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
+    const response = new responseErrorBuilder(
+      'error',
+      401,
+      'UNAUTHORIZED',
+      'User not authenticated',
+      {},
+      req
+    )
+    return res.status(401).send(response);
   }
 
   const userId = req.user.id;
@@ -58,13 +123,36 @@ exports.updateFolder = async (req, res) => {
   try {
     const result = await foldersService.updatefolder(folderId, name, parentFolderId, userId);
     logger.info('Folder updated', result);
-    res.status(200).send(result);
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
+    res.status(200).send(response);
   } catch (err) {
     if (err.message === 'Folder not found') {
-      return res.status(404).send('Folder not found');
+      logger.warn('Folder not found', { folderId, userId });
+      const response = new responseErrorBuilder(
+        'error',
+        404,
+        'NOT_FOUND',
+        'Folder not found',
+        { folderId },
+        req
+      );
+      return res.status(404).send(response);
     }
     logger.error('Failed to update folder', { error: err });
-    return res.status(500).send('Failed to update folder');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to update folder',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 
@@ -73,12 +161,28 @@ exports.deleteFolder = async (req, res) => {
 
   if (!folderId) {
     logger.error('Folder ID not provided');
-    return res.status(400).send('Folder ID not provided');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Folder ID not provided',
+      {},
+      req
+    );
+    return res.status(400).send(response);
   }
 
   if (!req.user) {
     logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
+    const response = new responseErrorBuilder(
+      'error',
+      401,
+      'UNAUTHORIZED',
+      'User not authenticated',
+      {},
+      req
+    )
+    return res.status(401).send(response);
   }
 
   const userId = req.user.id;
@@ -87,13 +191,35 @@ exports.deleteFolder = async (req, res) => {
   try {
     const result = await foldersService.deleteFolder(folderId, userId);
     logger.info('Folder and contents marked as deleted', result);
-    res.status(200).send('Folder deleted');
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
+    res.status(200).send(response);
   } catch (err) {
     if (err.message === 'Folder not found') {
       logger.warn('Folder not found', { folderId, userId });
-      return res.status(404).send('Folder not found');
+      const response = new responseErrorBuilder(
+        'error',
+        404,
+        'NOT_FOUND',
+        'Folder not found',
+        { folderId },
+        req
+      );
+      return res.status(404).send(response);
     }
     logger.error('Failed to delete folder', { error: err });
-    return res.status(500).send('Failed to delete folder');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to delete folder',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
