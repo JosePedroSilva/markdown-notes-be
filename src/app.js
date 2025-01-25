@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const logger = require('../logger');
+const requestIdMiddleware = require('./middleware/requestIdMiddleware');
 const requestLogger = require('./middleware/requestLogger');
 
 const authRoutes = require('./routes/authRoutes');
@@ -13,6 +14,7 @@ const foldersRoutes = require('./routes/foldersRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(requestIdMiddleware);
 app.use(requestLogger);
 
 const apiRouter = express.Router();
