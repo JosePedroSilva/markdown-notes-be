@@ -4,29 +4,21 @@ const generateAccessToken = require('../utils/generateAccessToken');
 const logger = require('../../logger');
 
 exports.registerUser = async (email, password) => {
-  try {
-    const uuid = crypto.randomUUID();
-    logger.trace('Generated UUID', { uuid });
+  const uuid = crypto.randomUUID();
+  logger.trace('Generated UUID', { uuid });
 
-    const hashedPassword = bycrypt.hashSync(password, 10);
-    logger.trace('Hashed password');
+  const hashedPassword = bycrypt.hashSync(password, 10);
+  logger.trace('Hashed password');
 
-    await userQueries.createUser(uuid, email, hashedPassword);
-    logger.info('User registered', { id: uuid });
+  await userQueries.createUser(uuid, email, hashedPassword);
+  logger.info('User registered', { id: uuid });
 
-    const accessToken = generateAccessToken({ id: uuid, email });
-    logger.trace('Generated access token');
+  const accessToken = generateAccessToken({ id: uuid, email });
+  logger.trace('Generated access token');
 
-    return {
-      token: accessToken,
-      user: { id: uuid, email }
-    }
-  } catch (err) {
-    if (err.name.includes('SequelizeUniqueConstraintError')) {
-      throw new Error('User already exists');
-    }
-    logger.error('Registration failed', err);
-    throw new Error(err);
+  return {
+    token: accessToken,
+    user: { id: uuid, email }
   }
 };
 

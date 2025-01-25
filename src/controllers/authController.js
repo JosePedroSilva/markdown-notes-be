@@ -1,5 +1,5 @@
 const logger = require('../../logger');
-
+const { successResponse, errorResponse } = require('../utils/responseUtil');
 const authService = require('../services/authService');
 
 exports.createUser = async (req, res) => {
@@ -7,22 +7,22 @@ exports.createUser = async (req, res) => {
 
   if (!email || !password) {
     logger.error('Email or password not provided');
-    return res.status(400).send('Email or password not provided');
+    return errorResponse(res, 400, { message: 'Email or password not provided', status: 'BAD_REQUEST', details: { email, password } });
   }
 
   try {
     const result = await authService.registerUser(email, password);
     logger.info('User registered', { id: result.user.id });
 
-    res.status(201).send(result);
+    return successResponse(res, 'User registered', result, 201);
 
   } catch (err) {
-    if (err.message === 'User already exists') {
-      logger.warn('Registration failed: Email already exists', { email });
-      return res.status(409).send(err.message);
+    if (err.name.includes('SequelizeUniqueConstraintError')) {
+      logger.warn('Registration failed: Email already exists', { err });
+      return errorResponse(res, 409, { message: 'Email already exists', status: 'CONFLICT', details: { error: err.message } });
     }
-    logger.error('Registration failed', { error: err });
-    return res.status(500).send('Registration failed');
+    logger.error('Registration failed', { err });
+    return errorResponse(res, 500, { message: 'Error registering user', details: { error: err.message } });
   }
 }
 
