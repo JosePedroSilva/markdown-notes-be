@@ -10,7 +10,7 @@ exports.createNote = async (title, content, folderId, userId) => {
     const noteId = crypto.randomUUID();
     logger.trace('Creating note', { noteId, title, content, folderId, userId });
 
-    const note = await notesQueries.createNote(noteId, title, content, folderId, userId);
+    const note = await notesQueries.createNote(noteId, title, content, userId, folderId);
 
     return note;
   } catch (err) {
