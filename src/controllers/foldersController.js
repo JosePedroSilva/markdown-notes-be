@@ -5,6 +5,7 @@ const foldersService = require('../services/foldersService');
 
 exports.createFolder = async (req, res) => {
   const { name, parentFolderId } = req.body;
+  const userId = req.user.id;
 
   if (typeof name !== 'string' || (parentFolderId && typeof parentFolderId !== 'string')) {
     logger.error('Invalid input type', { name, parentFolderId });
@@ -21,20 +22,6 @@ exports.createFolder = async (req, res) => {
     return res.status(400).send(response);
   }
 
-  if (!req.user) {
-    logger.error('User not authenticated');
-    const response = new responseErrorBuilder(
-      'error',
-      401,
-      'UNAUTHORIZED',
-      'User not authenticated',
-      {},
-      req
-    )
-    return res.status(401).send(response);
-  }
-
-  const userId = req.user.id;
   logger.trace('Creating folder', { name, parentFolderId, userId });
 
   try {
@@ -64,6 +51,7 @@ exports.createFolder = async (req, res) => {
 exports.updateFolder = async (req, res) => {
   const { folderId } = req.params;
   const { name, parentFolderId } = req.body;
+  const userId = req.user.id;
 
   if (!folderId) {
     logger.error('Folder ID not provided');
@@ -104,20 +92,6 @@ exports.updateFolder = async (req, res) => {
     return res.status(400).send(response);
   }
 
-  if (!req.user) {
-    logger.error('User not authenticated');
-    const response = new responseErrorBuilder(
-      'error',
-      401,
-      'UNAUTHORIZED',
-      'User not authenticated',
-      {},
-      req
-    )
-    return res.status(401).send(response);
-  }
-
-  const userId = req.user.id;
   logger.trace('Updating folder', { folderId, name, parentFolderId, userId });
 
   try {
@@ -158,34 +132,8 @@ exports.updateFolder = async (req, res) => {
 
 exports.deleteFolder = async (req, res) => {
   const { folderId } = req.params;
-
-  if (!folderId) {
-    logger.error('Folder ID not provided');
-    const response = new responseErrorBuilder(
-      'error',
-      400,
-      'BAD_REQUEST',
-      'Folder ID not provided',
-      {},
-      req
-    );
-    return res.status(400).send(response);
-  }
-
-  if (!req.user) {
-    logger.error('User not authenticated');
-    const response = new responseErrorBuilder(
-      'error',
-      401,
-      'UNAUTHORIZED',
-      'User not authenticated',
-      {},
-      req
-    )
-    return res.status(401).send(response);
-  }
-
   const userId = req.user.id;
+
   logger.trace('Deleting folder', { folderId, userId });
 
   try {
