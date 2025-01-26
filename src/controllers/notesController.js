@@ -48,7 +48,6 @@ exports.createNote = async (req, res) => {
 
 exports.getNote = async (req, res) => {
   const noteId = req.params.noteId;
-
   const userId = req.user.id;
   logger.trace('Fetching note', { noteId, userId });
 
