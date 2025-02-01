@@ -16,7 +16,7 @@ exports.createNote = async (title, content, folderId, userId) => {
 
 exports.getNoteById = async (noteId, userId) => {
   const note = await notesQueries.getNoteById(noteId, userId);
-  return note || null;
+  return note;
 };
 
 exports.updateNote = async (noteId, title, content, folderId, userId) => {
