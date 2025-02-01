@@ -1,15 +1,15 @@
 const { Note } = require('../../models');
 const { getFolderById } = require('./foldersQueries');
 
-exports.createNote = async (noteId, title, content, folderId, userId) => {
-  const existingFolder = await getFolderById(folderId, userId);
+exports.createNote = async (noteId, title, content, userId, folderId) => {
+  const validFolderId = folderId && (await getFolderById(folderId, userId)) ? folderId : null;
 
   const note = await Note.create({
     id: noteId,
     title,
     content,
     user_id: userId,
-    folderId: existingFolder ? folderId : null,
+    folderId: validFolderId,
   });
 
   return note;

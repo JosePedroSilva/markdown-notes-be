@@ -1,67 +1,93 @@
 const logger = require('../../logger');
-
-const buildFolderTree = require('../utils/buildFolderTree');
-
-const notesQueries = require('../services/queries/notesQueries');
-const foldersQueries = require('../services/queries/foldersQueries');
+const responseErrorBuilder = require('../utils/responseErrorBuilder');
+const responseSuccessBuilder = require('../utils/responseSuccessBuilder');
+const notesService = require('../services/notesService');
 
 exports.createNote = async (req, res) => {
   const { title, content, folderId } = req.body;
 
-  if (typeof title !== 'string') {
+  if (typeof title !== 'string' || (content && typeof content !== 'string') || (folderId && typeof folderId !== 'string')) {
     logger.error('Invalid input type', { title, folderId });
-    return res.status(400).send('Invalid input type');
-  }
-
-  if (!req.user) {
-    logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Invalid input type',
+      { title, content, folderId },
+      req
+    );
+    return res.status(400).send(response);
   }
 
   const userId = req.user.id;
   logger.trace('Creating note', { title, content, folderId, userId });
 
-  const noteId = crypto.randomUUID();
-
   try {
-    await notesQueries.createNote(noteId, title, content, folderId, userId);
-    logger.info('Note created', { title, folderId, userId });
-    res.status(201).send('Note created');
+    const result = await notesService.createNote(title, content, folderId, userId);
+    logger.info('Note created', result);
+    const response = new responseSuccessBuilder(
+      'success',
+      201,
+      result,
+      req
+    );
+    res.status(201).send(response);
   } catch (err) {
     logger.error('Failed to create note', { error: err });
-    return res.status(500).send('Failed to create note');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to create note',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 
 exports.getNote = async (req, res) => {
   const noteId = req.params.noteId;
-
-  if (typeof noteId !== 'string') {
-    logger.error('Invalid input type', { noteId });
-    return res.status(400).send('Invalid input type');
-  }
-
-  if (!req.user) {
-    logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
-  }
-
   const userId = req.user.id;
   logger.trace('Fetching note', { noteId, userId });
 
   try {
-    const note = await notesQueries.getNoteById(noteId, userId);
-    logger.debug('Fetched note', { note });
+    const result = await notesService.getNoteById(noteId, userId);
+    logger.debug('Fetched note', result);
 
-    if (!note) {
+    // TODO: WIth new ORM this should not work test later
+    if (!result) {
       logger.error('Note not found', { noteId });
-      return res.status(404).send('Note not found');
+      const response = new responseErrorBuilder(
+        'error',
+        404,
+        'NOT_FOUND',
+        'Note not found',
+        { noteId },
+        req
+      );
+      return res.status(404).send(response);
     }
 
-    res.status(200).send(note);
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
+    res.status(200).send(response);
+
   } catch (err) {
     logger.error('Failed to fetch note', { error: err });
-    return res.status(500).send('Failed to fetch note');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to fetch note',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 
@@ -69,85 +95,118 @@ exports.updateNote = async (req, res) => {
   const noteId = req.params.noteId;
   const { title, content, folderId } = req.body;
 
-  if (typeof noteId !== 'string') {
-    logger.error('Invalid input type', { noteId });
-    return res.status(400).send('Invalid input type');
+  if (!noteId) {
+    logger.error('Note id not provided');
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Note id not provided',
+      {},
+      req
+    );
+    return res.status(400).send(response);
   }
 
-  if (!req.user) {
-    logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
-  }
+  if ((title && typeof title !== 'string') ||
+    (content && typeof content !== 'string') ||
+    (folderId && typeof folderId !== 'string')) {
+    logger.error('Invalid input type', { title, content, folderId });
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Invalid input type',
+      { title, content, folderId },
+      req
+    );
+    return res.status(400).send(response);
+  };
 
   const userId = req.user.id;
   logger.trace('Updating note', { noteId, title, content, folderId, userId });
 
   try {
-    await notesQueries.updateNote(noteId, title, content, folderId, userId);
-    logger.info('Note updated', { noteId, title, content, folderId, userId });
-    res.status(200).send('Note updated');
+    const result = await notesService.updateNote(noteId, title, content, folderId, userId);
+    logger.info('Note updated', result);
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
+    res.status(200).send(response);
   } catch (err) {
     logger.error('Failed to update note', { error: err });
-    return res.status(500).send('Failed to update note');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to update note',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 
 exports.deleteNote = async (req, res) => {
   const noteId = req.params.noteId;
-
-  if (typeof noteId !== 'string') {
-    logger.error('Invalid input type', { noteId });
-    return res.status(400).send('Invalid input type');
-  }
-
-  if (!req.user) {
-    logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
-  }
-
   const userId = req.user.id;
   logger.trace('Deleting note', { noteId, userId });
 
   try {
-    await notesQueries.deleteNoteById(noteId, userId);
+    await notesService.deleteNote(noteId, userId);
     logger.info('Note deleted', { noteId, userId });
-    res.status(200).send('Note deleted');
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      {},
+      req
+    );
+    return res.status(200).send(response);
   } catch (err) {
     logger.error('Failed to delete note', { error: err });
-    return res.status(500).send('Failed to delete note');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to delete note',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 
 // Returns the base folder and notes tree, note that it does not return the content of the notes
 exports.getAllNotesOverview = async (req, res) => {
-  if (!req.user) {
-    logger.error('User not authenticated');
-    return res.status(401).send('User not authenticated');
-  }
-
   const userId = req.user.id;
 
   logger.trace('Fetching notes for user', { userId });
 
   try {
-    logger.trace('Fetching notes', { userId });
-    const notes = await notesQueries.getAllNotesByUserId(userId);
+    const result = await notesService.getAllNotesAndFoldersTree(userId);
 
-    logger.debug('Fetched notes', { notes });
-
-    logger.trace('Fetching folders', { userId });
-    const folders = await foldersQueries.getFoldersByUserId(userId);
-
-    logger.debug('Fetched folders', { folders });
-
-    logger.trace('Building folder tree', { folders, notes });
-    const folderTree = buildFolderTree(folders, notes);
-
-    logger.debug('Folder tree', { folderTree });
-    res.status(200).send({ folderTree });
+    logger.debug('Folder tree', result);
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
+    return res.status(200).send(response);
 
   } catch (err) {
     logger.error('Failed to fetch notes', { error: err });
-    return res.status(500).send('Failed to fetch notes');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Failed to fetch notes',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 }

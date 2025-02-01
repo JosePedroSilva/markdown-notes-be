@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const userQueries = require('../services/queries/userQueries');
 const logger = require('../../logger');
+const responseErrorBuilder = require('../utils/responseErrorBuilder');
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
@@ -29,8 +30,18 @@ const authenticateTokenMiddleware = async (req, res, next) => {
     const authHeader = req.header('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn('Invalid authorization header format');
-      return res.status(401).send('Invalid authorization header format');
+      logger.warn('Missing or invalid authorization header');
+
+      const response = new responseErrorBuilder(
+        'error',
+        401,
+        'UNAUTHORIZED',
+        'Missing or invalid authorization header',
+        {},
+        req
+      );
+
+      return res.status(401).send(response);
     }
 
     const token = authHeader.split(' ')[1];
@@ -39,7 +50,17 @@ const authenticateTokenMiddleware = async (req, res, next) => {
 
     if (!token) {
       logger.warn('Token not provided');
-      return res.status(401).send('Token not provided');
+
+      const response = new responseErrorBuilder(
+        'error',
+        401,
+        'UNAUTHORIZED',
+        'Token not provided',
+        {},
+        req
+      );
+
+      return res.status(401).send(response);
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -47,7 +68,16 @@ const authenticateTokenMiddleware = async (req, res, next) => {
 
     if (Date.now() >= decodedToken.exp * 1000) {
       logger.warn('Token expired');
-      return res.status(401).send('Token expired');
+
+      const response = new responseErrorBuilder(
+        'error',
+        401,
+        'UNAUTHORIZED',
+        'Token expired',
+        { token },
+        req
+      );
+      return res.status(401).send(response);
     }
 
     const user = await userQueries.getUserById(decodedToken.id);
@@ -56,7 +86,17 @@ const authenticateTokenMiddleware = async (req, res, next) => {
 
     if (!user) {
       logger.warn('User not found');
-      return res.status(401).send('User not found');
+
+      const response = new responseErrorBuilder(
+        'error',
+        401,
+        'UNAUTHORIZED',
+        'User not found',
+        { token },
+        req
+      );
+
+      return res.status(401).send(response);
     }
 
     req.user = {
@@ -72,10 +112,26 @@ const authenticateTokenMiddleware = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'JsonWebTokenError') {
       logger.warn('Invalid token', { error: err.message });
-      return res.status(403).send('Invalid token');
+      const response = new responseErrorBuilder(
+        'error',
+        403,
+        'FORBIDDEN',
+        'Invalid token',
+        {},
+        req
+      );
+      return res.status(403).send(response);
     }
     logger.error('Authentication error', { error: err });
-    return res.status(500).send('Internal server error');
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Internal server error',
+      {},
+      req
+    );
+    return res.status(500).send(response);
   }
 };
 

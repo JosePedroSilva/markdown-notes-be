@@ -1,42 +1,65 @@
-const bycrypt = require('bcryptjs');
-const userQueries = require('../services/queries/userQueries');
-
 const logger = require('../../logger');
+const authService = require('../services/authService');
 
-const generateAccessToken = require('../utils/generateAccessToken');
+const responseErrorBuilder = require('../utils/responseErrorBuilder');
+const responseSuccessBuilder = require('../utils/responseSuccessBuilder');
 
 exports.createUser = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     logger.error('Email or password not provided');
-    return res.status(400).send('Email or password not provided');
+
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Email or password not provided',
+      { email },
+      req
+    );
+
+    return res.status(400).send(response);
   }
 
   try {
-    const uuid = crypto.randomUUID();
-    logger.trace('Generated UUID', { uuid });
+    const result = await authService.registerUser(email, password);
+    logger.info('User registered', { id: result.user.id });
 
-    const hashedPassword = bycrypt.hashSync(password, 10);
-    logger.trace('Hashed password');
+    const response = new responseSuccessBuilder(
+      'success',
+      201,
+      result,
+      req
+    )
 
-    await userQueries.createUser(uuid, email, hashedPassword);
-    logger.info('User registered', { id: uuid });
-
-    const accessToken = generateAccessToken({ id: uuid, email });
-    logger.trace('Generated access token');
-
-    logger.info('User registered', { id: uuid });
-
-    res.status(201).send({ token: accessToken, user: { id: uuid, email } });
-
+    return res.status(201).send(response);
   } catch (err) {
     if (err.name.includes('SequelizeUniqueConstraintError')) {
-      logger.warn('Registration failed: Email already exists', { email });
-      return res.status(409).send('User already exists');
+      logger.warn('Registration failed: Email already exists', { err });
+
+      const response = new responseErrorBuilder(
+        'error',
+        409,
+        'CONFLICT',
+        'Email already exists',
+        { email },
+        req
+      );
+
+      return res.status(409).send(response);
     }
-    logger.error('Registration failed', { error: err });
-    return res.status(500).send('Registration failed');
+    logger.error('Registration failed', { err });
+
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Error registering user',
+      err.message,
+      req);
+
+    return res.status(500).send(response);
   }
 }
 
@@ -45,38 +68,63 @@ exports.login = async (req, res) => {
 
   if (!email || !password) {
     logger.error('Email or password not provided');
-    return res.status(400).send('Email or password not provided');
+
+    const response = new responseErrorBuilder(
+      'error',
+      400,
+      'BAD_REQUEST',
+      'Email or password not provided',
+      { email },
+      req
+    );
+
+    return res.status(400).send(response);
   }
 
   logger.trace('Login attempt', { email });
 
   try {
-    const user = await userQueries.getUserByEmail(email);
+    const result = await authService.login(email, password);
+    logger.info('User logged in', { id: result.user.id });
 
-    if (!user) {
-      logger.warn('Login failed: User not found', { email });
-      return res.status(404).send('User not found');
-    }
+    const response = new responseSuccessBuilder(
+      'success',
+      200,
+      result,
+      req
+    );
 
-    bycrypt.compare(password, user.password, (err, result) => {
-      if (err) {
-        logger.error('Login failed', { error: err });
-        return res.status(500).send('Error logging in');
-      }
+    res.status(200).send(response);
 
-      if (!result) {
-        logger.warn('Login failed: Invalid password', { email });
-        return res.status(401).send('Invalid password');
-      }
-
-      const accessToken = generateAccessToken({ id: user.id, email: user.email });
-
-      logger.info('User logged in', { id: user.id });
-
-      res.status(200).send({ token: accessToken, user: { id: user.id, email: user.email } });
-    });
   } catch (err) {
+    if (err.message === 'User not found' || err.message === 'Invalid password') {
+      logger.warn('Login failed: Invalid credentials', { email });
+
+      const response = new responseErrorBuilder(
+        'error',
+        401,
+        'UNAUTHORIZED',
+        'Invalid credentials',
+        {
+          email,
+          error: err.message
+        },
+        req
+      );
+
+      return res.status(401).send(response);
+    }
     logger.error('Login failed', { error: err });
-    return res.status(500).send('Error logging in');
+
+    const response = new responseErrorBuilder(
+      'error',
+      500,
+      'INTERNAL_SERVER_ERROR',
+      'Error logging in',
+      err.message,
+      req
+    );
+
+    return res.status(500).send(response);
   }
 }
