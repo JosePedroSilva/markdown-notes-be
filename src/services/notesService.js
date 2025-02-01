@@ -23,16 +23,22 @@ exports.updateNote = async (noteId, title, content, folderId, userId) => {
   const existingNote = await notesQueries.getNoteById(noteId, userId);
 
   if (!existingNote) {
-    return null;
+    throw new Error('Note not found');
   }
 
-  const result = await notesQueries.updateNote(noteId, title, content, folderId, userId);
-  return result ? { message: 'Note updated' } : null;
+  await notesQueries.updateNote(noteId, title, content, folderId, userId);
+  return { message: 'Note updated' };
 };
 
 exports.deleteNote = async (noteId, userId) => {
-  const result = await notesQueries.deleteNoteById(noteId, userId);
-  return result ? { message: 'Note deleted' } : null;
+  const existingNote = await notesQueries.getNoteById(noteId, userId);
+
+  if (!existingNote) {
+    throw new Error('Note not found');
+  }
+
+  await notesQueries.deleteNoteById(noteId, userId);
+  return { message: 'Note deleted' };
 };
 
 exports.getAllNotesAndFoldersTree = async (userId) => {
