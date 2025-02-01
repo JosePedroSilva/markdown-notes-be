@@ -1,4 +1,4 @@
-name: Lint Code Base
+name: Test Code Base
 
 on:
   push:
@@ -7,9 +7,11 @@ on:
     branches: ['**']
 
 jobs:
-  lint:
+  test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout code
