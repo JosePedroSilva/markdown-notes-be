@@ -1,4 +1,4 @@
-# Markdown Notes Backend (WIP - README outdated)
+# Markdown Notes Backend (WIP - README outdated )
 
 A backend service for a markdown-based note-taking application. This service provides user authentication, note and folder management. It currently uses SQLite as the database engine and is built with Express.js.
 
