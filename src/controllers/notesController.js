@@ -53,9 +53,7 @@ exports.getNote = async (req, res) => {
 
   try {
     const result = await notesService.getNoteById(noteId, userId);
-    logger.debug('Fetched note', result);
 
-    // TODO: WIth new ORM this should not work test later
     if (!result) {
       logger.error('Note not found', { noteId });
       const response = new responseErrorBuilder(
@@ -137,6 +135,18 @@ exports.updateNote = async (req, res) => {
     );
     res.status(200).send(response);
   } catch (err) {
+    if (err.message === 'Note not found') {
+      logger.error('Note not found', { noteId });
+      const response = new responseErrorBuilder(
+        'error',
+        404,
+        'NOT_FOUND',
+        'Note not found',
+        { noteId },
+        req
+      );
+      return res.status(404).send(response);
+    }
     logger.error('Failed to update note', { error: err });
     const response = new responseErrorBuilder(
       'error',
@@ -166,6 +176,18 @@ exports.deleteNote = async (req, res) => {
     );
     return res.status(200).send(response);
   } catch (err) {
+    if (err.message === 'Note not found') {
+      logger.error('Note not found', { noteId });
+      const response = new responseErrorBuilder(
+        'error',
+        404,
+        'NOT_FOUND',
+        'Note not found',
+        { noteId },
+        req
+      );
+      return res.status(404).send(response);
+    }
     logger.error('Failed to delete note', { error: err });
     const response = new responseErrorBuilder(
       'error',

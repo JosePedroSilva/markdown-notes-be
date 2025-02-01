@@ -21,6 +21,6 @@ export default [
     }
   },
   {
-    ignores: ['**/node_modules/**', 'logger.js', '**/__tests__/**'],
+    ignores: ['**/node_modules/**', 'logger.js', '**/__tests__/**', 'jest.setup.js'],
   }
 ];

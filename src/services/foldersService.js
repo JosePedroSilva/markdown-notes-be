@@ -6,7 +6,7 @@ exports.createFolder = async (name, parentFolderId, userId) => {
   const folderId = crypto.randomUUID();
   logger.trace('Generated folder ID', { folderId });
 
-  const folder = await foldersQueries.createFolder(folderId, name, userId, parentFolderId);
+  const folder = await foldersQueries.createFolder(folderId, name, userId, parentFolderId ? parentFolderId : null);
   return folder;
 };
 
