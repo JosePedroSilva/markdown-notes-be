@@ -1,9 +1,10 @@
 name: Run Tests on PR
 
 on:
+  push:
+    branches: ['**']
   pull_request:
-    branches:
-      - main  # Run tests on PRs targeting the "main" branch (adjust if needed)
+    branches: ['**']
 
 jobs:
   test:
